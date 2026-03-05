@@ -1,4 +1,9 @@
 package uk.ac.tees.mad.mystudyplanner.navigation
 
-class Destinations {
-}
+import kotlinx.serialization.Serializable
+
+@Serializable
+object Splash
+
+@Serializable
+object Home
