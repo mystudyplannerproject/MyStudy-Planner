@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import uk.ac.tees.mad.mystudyplanner.presentation.auth.AuthScreen
 import uk.ac.tees.mad.mystudyplanner.presentation.home.HomeScreen
+import uk.ac.tees.mad.mystudyplanner.presentation.schedule.ScheduleScreen
 import uk.ac.tees.mad.mystudyplanner.presentation.splash.SplashScreen
 import uk.ac.tees.mad.mystudyplanner.presentation.splash.SplashViewModel
 
@@ -50,7 +51,24 @@ fun MyStudyPlannerNavGraph() {
         }
 
         composable<Home> {
-            HomeScreen()
+            HomeScreen(
+                onAddScheduleClick = {
+                    navController.navigate(Schedule())
+                },
+                onEditScheduleClick = { scheduleId ->
+                    navController.navigate(Schedule(scheduleId))
+                }
+            )
+        }
+
+        composable<Schedule> { backStackEntry ->
+            val args = backStackEntry.arguments
+            val scheduleId = args?.getString("scheduleId")
+
+            ScheduleScreen(
+                scheduleId = scheduleId,
+                onBack = { navController.popBackStack() }
+            )
         }
     }
 }

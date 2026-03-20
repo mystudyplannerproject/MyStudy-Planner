@@ -10,3 +10,8 @@ object Home
 
 @Serializable
 object Auth
+
+@Serializable
+data class Schedule(
+    val scheduleId: String? = null
+)
