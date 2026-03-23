@@ -1,17 +1,71 @@
 package uk.ac.tees.mad.mystudyplanner.presentation.schedule
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.tooling.preview.Preview
+import uk.ac.tees.mad.mystudyplanner.ui.theme.MyStudyPlannerTheme
 
 @Composable
 fun ScheduleScreen(
-    scheduleId: String?,
-    onBack: () -> Unit
+    isEditMode: Boolean,
+    scheduleId: String?
 ) {
-    val isEditMode = scheduleId != null
+    val uiState = remember {
+        ScheduleUiState(
+            subject = if (isEditMode) "Mathematics" else "",
+            startTime = if (isEditMode) "09:00 AM" else "",
+            endTime = if (isEditMode) "10:00 AM" else "",
+            day = if (isEditMode) "Monday" else ""
+        )
+    }
 
     ScheduleContent(
+        uiState = uiState,
         isEditMode = isEditMode,
-        scheduleId = scheduleId,
-        onBack = onBack
+        onSubjectChange = {},
+        onDayChange = {},
+        onStartTimeClick = {},
+        onEndTimeClick = {},
+        onSaveClick = {},
+        onDeleteClick = {}
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AddSchedulePreview() {
+    MyStudyPlannerTheme {
+        ScheduleContent(
+            uiState = ScheduleUiState(),
+            isEditMode = false,
+            onSubjectChange = {},
+            onDayChange = {},
+            onStartTimeClick = {},
+            onEndTimeClick = {},
+            onSaveClick = {},
+            onDeleteClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun EditSchedulePreview() {
+    MyStudyPlannerTheme {
+        ScheduleContent(
+            uiState = ScheduleUiState(
+                subject = "Physics",
+                startTime = "11:00 AM",
+                endTime = "12:00 PM",
+                day = "Tuesday"
+            ),
+            isEditMode = true,
+            onSubjectChange = {},
+            onDayChange = {},
+            onStartTimeClick = {},
+            onEndTimeClick = {},
+            onSaveClick = {},
+            onDeleteClick = {}
+        )
+    }
 }
