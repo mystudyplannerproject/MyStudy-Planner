@@ -11,6 +11,14 @@ val BlueSurface = Color(0xFFFFFFFF)
 val BlueOnPrimary = Color(0xFFFFFFFF)
 val BlueOnBackground = Color(0xFF1A1C1E)
 
+val BlueOnSurface = Color(0xFF1A1C1E)
+val BlueOnSecondary = Color(0xFF1A1C1E)
+val BlueOnTertiary = Color(0xFF1A1C1E)
+
+val DarkBlueOnSurface = Color(0xFFE3E8F0)
+val DarkBlueOnSecondary = Color(0xFFE3E8F0)
+val DarkBlueOnTertiary = Color(0xFFE3E8F0)
+
 val DarkBluePrimary = Color(0xFF9CC3FF)
 val DarkBlueSecondary = Color(0xFF4A6FA5)
 val DarkBlueTertiary = Color(0xFF6EA8FF)

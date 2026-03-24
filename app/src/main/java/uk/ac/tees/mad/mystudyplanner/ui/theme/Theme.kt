@@ -15,21 +15,33 @@ private val DarkColorScheme = darkColorScheme(
     primary = DarkBluePrimary,
     secondary = DarkBlueSecondary,
     tertiary = DarkBlueTertiary,
+
     background = DarkBlueBackground,
     surface = DarkBlueSurface,
+
     onPrimary = DarkBlueOnPrimary,
-    onBackground = DarkBlueOnBackground
+    onSecondary = DarkBlueOnSecondary,
+    onTertiary = DarkBlueOnTertiary,
+    onBackground = DarkBlueOnBackground,
+    onSurface = DarkBlueOnSurface
 )
+
 
 private val LightColorScheme = lightColorScheme(
     primary = BluePrimary,
     secondary = BlueSecondary,
     tertiary = BlueTertiary,
+
     background = BlueBackground,
     surface = BlueSurface,
+
     onPrimary = BlueOnPrimary,
-    onBackground = BlueOnBackground
+    onSecondary = BlueOnSecondary,
+    onTertiary = BlueOnTertiary,
+    onBackground = BlueOnBackground,
+    onSurface = BlueOnSurface
 )
+
 
 @Composable
 fun MyStudyPlannerTheme(

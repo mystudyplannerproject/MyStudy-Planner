@@ -62,10 +62,11 @@ fun MyStudyPlannerNavGraph() {
         }
 
         composable<Schedule> { backStackEntry ->
-            val args = backStackEntry.arguments
-            val scheduleId = args?.getString("scheduleId")
+            val scheduleId = backStackEntry.arguments?.getString("scheduleId")
+            val isEditMode = scheduleId != null
 
             ScheduleScreen(
+                isEditMode = isEditMode,
                 scheduleId = scheduleId,
                 onBack = { navController.popBackStack() }
             )
