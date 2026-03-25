@@ -35,13 +35,24 @@ fun ScheduleScreen(
         onStartTimeClick = { /* Time picker later */ },
         onEndTimeClick = { /* Time picker later */ },
         onSaveClick = {
-            viewModel.addSchedule(
-                uiState = uiState,
-                onSuccess = { onBack() },
-                onError = { message ->
-                    uiState.copy(error = message)
-                }
-            )
+            if (isEditMode) {
+                viewModel.updateSchedule(
+                    scheduleId = scheduleId,
+                    uiState = uiState,
+                    onSuccess = { onBack() },
+                    onError = { message ->
+                        uiState.copy(error = message)
+                    }
+                )
+            } else {
+                viewModel.addSchedule(
+                    uiState = uiState,
+                    onSuccess = { onBack() },
+                    onError = { message ->
+                        uiState.copy(error = message)
+                    }
+                )
+            }
         },
         onDeleteClick = { /* Commit 11 */ }
     )

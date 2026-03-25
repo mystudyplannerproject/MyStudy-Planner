@@ -14,7 +14,6 @@ class ScheduleViewModel : ViewModel() {
         onSuccess: () -> Unit,
         onError: (String) -> Unit
     ) {
-
         if (isSubmitting) return
 
         if (
@@ -38,11 +37,48 @@ class ScheduleViewModel : ViewModel() {
 
         repository.addSchedule(schedule) { success ->
             isSubmitting = false
-            if (success) {
-                onSuccess()
-            } else {
-                onError("Failed to save schedule")
-            }
+            if (success) onSuccess()
+            else onError("Failed to save schedule")
+        }
+    }
+
+    fun updateSchedule(
+        scheduleId: String?,
+        uiState: ScheduleUiState,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        if (isSubmitting) return
+
+        if (scheduleId.isNullOrBlank()) {
+            onError("Invalid schedule")
+            return
+        }
+
+        if (
+            uiState.subject.isBlank() ||
+            uiState.day.isBlank() ||
+            uiState.startTime.isBlank() ||
+            uiState.endTime.isBlank()
+        ) {
+            onError("Please fill all fields")
+            return
+        }
+
+        isSubmitting = true
+
+        val schedule = StudySchedule(
+            id = scheduleId,
+            subject = uiState.subject,
+            startTime = uiState.startTime,
+            endTime = uiState.endTime,
+            day = uiState.day
+        )
+
+        repository.updateSchedule(schedule) { success ->
+            isSubmitting = false
+            if (success) onSuccess()
+            else onError("Failed to update schedule")
         }
     }
 }
