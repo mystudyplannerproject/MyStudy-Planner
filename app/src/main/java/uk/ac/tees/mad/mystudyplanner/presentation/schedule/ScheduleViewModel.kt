@@ -81,4 +81,28 @@ class ScheduleViewModel : ViewModel() {
             else onError("Failed to update schedule")
         }
     }
+
+    fun deleteSchedule(
+        scheduleId: String?,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        if (isSubmitting) return
+
+        if (scheduleId.isNullOrBlank()) {
+            onError("Invalid schedule")
+            return
+        }
+
+        isSubmitting = true
+
+        repository.deleteSchedule(scheduleId) { success ->
+            isSubmitting = false
+            if (success) {
+                onSuccess()
+            } else {
+                onError("Failed to delete schedule. Check internet connection.")
+            }
+        }
+    }
 }

@@ -54,7 +54,17 @@ fun ScheduleScreen(
                 )
             }
         },
-        onDeleteClick = { /* Commit 11 */ }
+        onDeleteClick = {
+            viewModel.deleteSchedule(
+                scheduleId = scheduleId,
+                onSuccess = {
+                    onBack()
+                },
+                onError = { message ->
+                    uiState.copy(error = message)
+                }
+            )
+        }
     )
 }
 
