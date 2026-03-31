@@ -1,5 +1,6 @@
 package uk.ac.tees.mad.mystudyplanner.presentation.schedule
 
+import android.Manifest
 import android.app.TimePickerDialog
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
@@ -101,7 +102,6 @@ fun ScheduleScreen(
 }
 
 private fun formatTo12Hour(hour: Int, minute: Int): String {
-
     val amPm = if (hour >= 12) "PM" else "AM"
 
     val formattedHour = when {

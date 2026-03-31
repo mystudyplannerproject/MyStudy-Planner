@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import uk.ac.tees.mad.mystudyplanner.data.model.StudySchedule
 import uk.ac.tees.mad.mystudyplanner.data.repository.ScheduleRepository
+import uk.ac.tees.mad.mystudyplanner.notification.CalendarHelper
 import uk.ac.tees.mad.mystudyplanner.notification.ReminderScheduler
 
 class ScheduleViewModel : ViewModel() {
@@ -50,7 +51,13 @@ class ScheduleViewModel : ViewModel() {
                     schedule.subject,
                     triggerTimeMillis
                 )
-
+                CalendarHelper.addEventToCalendar(
+                    context = context,
+                    scheduleId = schedule.id,
+                    title = schedule.subject,
+                    startTimeMillis = triggerTimeMillis,
+                    endTimeMillis = triggerTimeMillis + 3600000
+                )
                 onSuccess()
             } else {
                 onError("Failed to save schedule")
@@ -106,7 +113,13 @@ class ScheduleViewModel : ViewModel() {
                     schedule.subject,
                     triggerTimeMillis
                 )
-
+                CalendarHelper.addEventToCalendar(
+                    context = context,
+                    scheduleId = scheduleId,
+                    title = schedule.subject,
+                    startTimeMillis = triggerTimeMillis,
+                    endTimeMillis = triggerTimeMillis + 3600000
+                )
                 onSuccess()
             } else {
                 onError("Failed to update schedule")
