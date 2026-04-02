@@ -29,4 +29,8 @@ class PreferencesManager(context: Context) {
     fun getReminderOffset(): Int {
         return prefs.getInt(KEY_REMINDER_OFFSET, 10)
     }
+
+    fun clearAll() {
+        prefs.edit { clear() }
+    }
 }

@@ -2,6 +2,11 @@ package uk.ac.tees.mad.mystudyplanner.presentation.schedule
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import uk.ac.tees.mad.mystudyplanner.data.model.StudySchedule
 import uk.ac.tees.mad.mystudyplanner.data.repository.ScheduleRepository
 import uk.ac.tees.mad.mystudyplanner.notification.CalendarHelper
@@ -10,37 +15,59 @@ import uk.ac.tees.mad.mystudyplanner.notification.ReminderScheduler
 class ScheduleViewModel : ViewModel() {
 
     private val repository = ScheduleRepository()
+
+    private val _uiState = MutableStateFlow(ScheduleUiState())
+    val uiState: StateFlow<ScheduleUiState> = _uiState.asStateFlow()
+
     private var isSubmitting = false
+
+    fun updateSubject(value: String) {
+        _uiState.value = _uiState.value.copy(subject = value, error = null)
+    }
+
+    fun updateDay(value: String) {
+        _uiState.value = _uiState.value.copy(day = value, error = null)
+    }
+
+    fun updateStartTime(value: String) {
+        _uiState.value = _uiState.value.copy(startTime = value, error = null)
+    }
+
+    fun updateEndTime(value: String) {
+        _uiState.value = _uiState.value.copy(endTime = value, error = null)
+    }
 
     fun addSchedule(
         context: Context,
-        uiState: ScheduleUiState,
-        onSuccess: () -> Unit,
-        onError: (String) -> Unit
+        onSuccess: () -> Unit
     ) {
+
+        val state = _uiState.value
+
         if (isSubmitting) return
 
         if (
-            uiState.subject.isBlank() ||
-            uiState.day.isBlank() ||
-            uiState.startTime.isBlank() ||
-            uiState.endTime.isBlank()
+            state.subject.isBlank() ||
+            state.day.isBlank() ||
+            state.startTime.isBlank() ||
+            state.endTime.isBlank()
         ) {
-            onError("Please fill all fields")
+            _uiState.value = state.copy(error = "Please fill all fields")
             return
         }
 
         isSubmitting = true
 
         val schedule = StudySchedule(
-            subject = uiState.subject,
-            startTime = uiState.startTime,
-            endTime = uiState.endTime,
-            day = uiState.day
+            subject = state.subject,
+            startTime = state.startTime,
+            endTime = state.endTime,
+            day = state.day
         )
 
         repository.addSchedule(schedule) { success ->
             isSubmitting = false
+
             if (success) {
 
                 val triggerTimeMillis = System.currentTimeMillis() + 60000
@@ -51,6 +78,7 @@ class ScheduleViewModel : ViewModel() {
                     schedule.subject,
                     triggerTimeMillis
                 )
+
                 CalendarHelper.addEventToCalendar(
                     context = context,
                     scheduleId = schedule.id,
@@ -58,9 +86,12 @@ class ScheduleViewModel : ViewModel() {
                     startTimeMillis = triggerTimeMillis,
                     endTimeMillis = triggerTimeMillis + 3600000
                 )
+
                 onSuccess()
+
             } else {
-                onError("Failed to save schedule")
+                _uiState.value =
+                    _uiState.value.copy(error = "Failed to save schedule")
             }
         }
     }
@@ -68,39 +99,36 @@ class ScheduleViewModel : ViewModel() {
     fun updateSchedule(
         context: Context,
         scheduleId: String?,
-        uiState: ScheduleUiState,
-        onSuccess: () -> Unit,
-        onError: (String) -> Unit
+        onSuccess: () -> Unit
     ) {
-        if (isSubmitting) return
+
+        val state = _uiState.value
 
         if (scheduleId.isNullOrBlank()) {
-            onError("Invalid schedule")
+            _uiState.value = state.copy(error = "Invalid schedule")
             return
         }
 
         if (
-            uiState.subject.isBlank() ||
-            uiState.day.isBlank() ||
-            uiState.startTime.isBlank() ||
-            uiState.endTime.isBlank()
+            state.subject.isBlank() ||
+            state.day.isBlank() ||
+            state.startTime.isBlank() ||
+            state.endTime.isBlank()
         ) {
-            onError("Please fill all fields")
+            _uiState.value = state.copy(error = "Please fill all fields")
             return
         }
 
-        isSubmitting = true
-
         val schedule = StudySchedule(
             id = scheduleId,
-            subject = uiState.subject,
-            startTime = uiState.startTime,
-            endTime = uiState.endTime,
-            day = uiState.day
+            subject = state.subject,
+            startTime = state.startTime,
+            endTime = state.endTime,
+            day = state.day
         )
 
         repository.updateSchedule(schedule) { success ->
-            isSubmitting = false
+
             if (success) {
 
                 ReminderScheduler.cancelReminder(context, scheduleId)
@@ -113,6 +141,7 @@ class ScheduleViewModel : ViewModel() {
                     schedule.subject,
                     triggerTimeMillis
                 )
+
                 CalendarHelper.addEventToCalendar(
                     context = context,
                     scheduleId = scheduleId,
@@ -120,9 +149,12 @@ class ScheduleViewModel : ViewModel() {
                     startTimeMillis = triggerTimeMillis,
                     endTimeMillis = triggerTimeMillis + 3600000
                 )
+
                 onSuccess()
+
             } else {
-                onError("Failed to update schedule")
+                _uiState.value =
+                    _uiState.value.copy(error = "Failed to update schedule")
             }
         }
     }
@@ -130,27 +162,27 @@ class ScheduleViewModel : ViewModel() {
     fun deleteSchedule(
         context: Context,
         scheduleId: String?,
-        onSuccess: () -> Unit,
-        onError: (String) -> Unit
+        onSuccess: () -> Unit
     ) {
-        if (isSubmitting) return
 
         if (scheduleId.isNullOrBlank()) {
-            onError("Invalid schedule")
+            _uiState.value =
+                _uiState.value.copy(error = "Invalid schedule")
             return
         }
 
-        isSubmitting = true
-
         repository.deleteSchedule(scheduleId) { success ->
-            isSubmitting = false
+
             if (success) {
 
                 ReminderScheduler.cancelReminder(context, scheduleId)
-
                 onSuccess()
+
             } else {
-                onError("Failed to delete schedule. Check internet connection.")
+                _uiState.value =
+                    _uiState.value.copy(
+                        error = "Failed to delete schedule"
+                    )
             }
         }
     }

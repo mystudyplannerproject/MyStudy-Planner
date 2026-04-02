@@ -15,3 +15,6 @@ object Auth
 data class Schedule(
     val scheduleId: String? = null
 )
+
+@Serializable
+object Settings

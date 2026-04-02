@@ -74,7 +74,7 @@ fun SettingsScreen(
 
             Button(
                 onClick = {
-                    viewModel.logout {
+                    viewModel.logout(context) {
                         onLogout()
                     }
                 },

@@ -23,8 +23,10 @@ class SettingsViewModel : ViewModel() {
         PreferencesManager(context).setReminderOffset(minutes)
     }
 
-    fun logout(onLoggedOut: () -> Unit) {
+    fun logout(context: Context, onLoggedOut: () -> Unit) {
         FirebaseAuth.getInstance().signOut()
+        PreferencesManager(context).clearAll()
         onLoggedOut()
     }
+
 }

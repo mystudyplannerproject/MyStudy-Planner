@@ -1,6 +1,5 @@
 package uk.ac.tees.mad.mystudyplanner.presentation.schedule
 
-import android.Manifest
 import android.app.TimePickerDialog
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
@@ -19,17 +18,7 @@ fun ScheduleScreen(
 
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
-
-    var uiState by remember {
-        mutableStateOf(
-            ScheduleUiState(
-                subject = if (isEditMode) "Mathematics" else "",
-                startTime = if (isEditMode) "09:00 AM" else "",
-                endTime = if (isEditMode) "10:00 AM" else "",
-                day = if (isEditMode) "Monday" else ""
-            )
-        )
-    }
+    val uiState by viewModel.uiState.collectAsState()
 
     fun showTimePicker(onTimeSelected: (String) -> Unit) {
         val hour = calendar.get(Calendar.HOUR_OF_DAY)
@@ -38,7 +27,8 @@ fun ScheduleScreen(
         TimePickerDialog(
             context,
             { _, selectedHour, selectedMinute ->
-                val formattedTime = formatTo12Hour(selectedHour, selectedMinute)
+                val formattedTime =
+                    formatTo12Hour(selectedHour, selectedMinute)
                 onTimeSelected(formattedTime)
             },
             hour,
@@ -50,52 +40,37 @@ fun ScheduleScreen(
     ScheduleContent(
         uiState = uiState,
         isEditMode = isEditMode,
-        onSubjectChange = { uiState = uiState.copy(subject = it) },
-        onDayChange = { uiState = uiState.copy(day = it) },
-
+        onSubjectChange = viewModel::updateSubject,
+        onDayChange = viewModel::updateDay,
         onStartTimeClick = {
             showTimePicker { time ->
-                uiState = uiState.copy(startTime = time)
+                viewModel.updateStartTime(time)
             }
         },
-
         onEndTimeClick = {
             showTimePicker { time ->
-                uiState = uiState.copy(endTime = time)
+                viewModel.updateEndTime(time)
             }
         },
-
         onSaveClick = {
             if (isEditMode) {
                 viewModel.updateSchedule(
                     context = context,
                     scheduleId = scheduleId,
-                    uiState = uiState,
-                    onSuccess = { onBack() },
-                    onError = { message ->
-                        uiState = uiState.copy(error = message)
-                    }
+                    onSuccess = onBack
                 )
             } else {
                 viewModel.addSchedule(
                     context = context,
-                    uiState = uiState,
-                    onSuccess = { onBack() },
-                    onError = { message ->
-                        uiState = uiState.copy(error = message)
-                    }
+                    onSuccess = onBack
                 )
             }
         },
-
         onDeleteClick = {
             viewModel.deleteSchedule(
                 context = context,
                 scheduleId = scheduleId,
-                onSuccess = { onBack() },
-                onError = { message ->
-                    uiState = uiState.copy(error = message)
-                }
+                onSuccess = onBack
             )
         }
     )
