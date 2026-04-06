@@ -10,21 +10,18 @@ import uk.ac.tees.mad.mystudyplanner.ui.theme.MyStudyPlannerTheme
 
 @Composable
 fun HomeScreen(
+    viewModel: HomeViewModel = viewModel(),
     onAddScheduleClick: () -> Unit,
-    onEditScheduleClick: (String) -> Unit,
-    viewModel: HomeViewModel = viewModel()
+    onEditScheduleClick: (String) -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(Unit) {
-        viewModel.loadTodayPlan()
-    }
+    val uiState by viewModel.uiState.collectAsState()
 
     HomeContent(
         uiState = uiState,
         onAddScheduleClick = onAddScheduleClick,
-        onSessionClick = { session ->
-            onEditScheduleClick(session.id)
+        onSessionClick = {
+            onEditScheduleClick(it.id)
         }
     )
 }
