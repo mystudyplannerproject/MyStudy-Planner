@@ -17,31 +17,6 @@ class ScheduleRepository {
             .document(auth.currentUser!!.uid)
             .collection("schedules")
 
-    fun observeSchedules(onDataChange: (List<StudySchedule>) -> Unit) {
-
-        if (listener != null) return
-
-        listener = userSchedulesRef()
-            .addSnapshotListener { snapshot, error ->
-
-                if (error != null) return@addSnapshotListener
-
-                if (snapshot != null) {
-
-                    val schedules = snapshot.documents.mapNotNull { doc ->
-                        doc.toObject(StudySchedule::class.java)
-                    }
-
-                    onDataChange(schedules)
-                }
-            }
-    }
-
-    fun clearListener() {
-        listener?.remove()
-        listener = null
-    }
-
     fun addSchedule(schedule: StudySchedule, onResult: (Boolean) -> Unit) {
         val doc = userSchedulesRef().document()
         doc.set(schedule.copy(id = doc.id))
@@ -63,5 +38,21 @@ class ScheduleRepository {
             .delete()
             .addOnSuccessListener { onResult(true) }
             .addOnFailureListener { onResult(false) }
+    }
+
+    fun getScheduleById(
+        scheduleId: String,
+        onResult: (StudySchedule?) -> Unit
+    ) {
+
+        userSchedulesRef()
+            .document(scheduleId)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                onResult(snapshot.toObject(StudySchedule::class.java))
+            }
+            .addOnFailureListener {
+                onResult(null)
+            }
     }
 }

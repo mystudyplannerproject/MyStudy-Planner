@@ -12,12 +12,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import uk.ac.tees.mad.mystudyplanner.presentation.components.StudySessionCard
+import uk.ac.tees.mad.mystudyplanner.presentation.components.StudySessionUiState
 
 @Composable
 fun HomeContent(
     uiState: HomeUiState,
     onAddScheduleClick: () -> Unit,
-    onSessionClick: (StudySessionUiState) -> Unit
+    onSessionClick: (StudySessionUiState) -> Unit,
+    onDeleteSession: (String) -> Unit
 ) {
     Scaffold(
         floatingActionButton = {
@@ -36,13 +39,12 @@ fun HomeContent(
 
         Column(
             modifier = Modifier
-                .padding(padding)
-                .padding(16.dp)
                 .fillMaxSize()
+                .padding(16.dp)
         ) {
 
             Text(
-                text = "Today's Study Plan",
+                text = "Your Study Plan",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
@@ -55,13 +57,26 @@ fun HomeContent(
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(uiState.sessions) { session ->
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { onSessionClick(session) }
+                    items(
+                        items = uiState.sessions,
+                        key = { it.id }   // important for animation stability
+                    ) { session ->
+
+                        SwipeToDeleteItem(
+                            session = session,
+                            onDelete = onDeleteSession
                         ) {
-                            StudySessionCard(session)
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable(
+                                        enabled = !session.isCompleted
+                                    ) {
+                                        onSessionClick(session)
+                                    }
+                            ) {
+                                StudySessionCard(session)
+                            }
                         }
                     }
                 }
@@ -83,3 +98,42 @@ fun EmptyStudyPlan() {
         )
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SwipeToDeleteItem(
+    session: StudySessionUiState,
+    onDelete: (String) -> Unit,
+    content: @Composable () -> Unit
+) {
+
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = {
+            if (it == SwipeToDismissBoxValue.EndToStart) {
+                onDelete(session.id)
+            }
+            true
+        }
+    )
+
+    SwipeToDismissBox(
+        state = dismissState,
+        backgroundContent = {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                Text(
+                    text = "Delete",
+                    color = MaterialTheme.colorScheme.error,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    ) {
+        content()
+    }
+}
+

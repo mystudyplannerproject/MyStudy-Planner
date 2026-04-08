@@ -10,11 +10,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -32,7 +30,6 @@ fun ScheduleContent(
     uiState: ScheduleUiState,
     isEditMode: Boolean,
     onSubjectChange: (String) -> Unit,
-    onDayChange: (String) -> Unit,
     onStartTimeClick: () -> Unit,
     onEndTimeClick: () -> Unit,
     onSaveClick: () -> Unit,
@@ -40,7 +37,6 @@ fun ScheduleContent(
 ) {
 
     var showDeleteDialog by remember { mutableStateOf(false) }
-
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -57,15 +53,13 @@ fun ScheduleContent(
             Text(
                 text = if (isEditMode) "Edit Study Schedule" else "Add Study Schedule",
                 style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
+                fontWeight = FontWeight.Bold
             )
 
             if (uiState.error != null) {
                 Text(
                     text = uiState.error,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyMedium
+                    color = MaterialTheme.colorScheme.error
                 )
             }
 
@@ -73,32 +67,7 @@ fun ScheduleContent(
                 value = uiState.subject,
                 onValueChange = onSubjectChange,
                 label = { Text("Subject") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                    focusedLabelColor = MaterialTheme.colorScheme.primary,
-                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface
-                )
-            )
-
-            OutlinedTextField(
-                value = uiState.day,
-                onValueChange = onDayChange,
-                label = { Text("Day (e.g. Monday)") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                    focusedLabelColor = MaterialTheme.colorScheme.primary,
-                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface
-                )
+                modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
@@ -108,15 +77,7 @@ fun ScheduleContent(
                 label = { Text("Start Time") },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { onStartTimeClick() },
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.secondary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                    focusedLabelColor = MaterialTheme.colorScheme.secondary,
-                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface
-                )
+                    .clickable { onStartTimeClick() }
             )
 
             OutlinedTextField(
@@ -126,37 +87,22 @@ fun ScheduleContent(
                 label = { Text("End Time") },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { onEndTimeClick() },
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.secondary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                    focusedLabelColor = MaterialTheme.colorScheme.secondary,
-                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface
-                )
+                    .clickable { onEndTimeClick() }
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
             Button(
                 onClick = onSaveClick,
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                )
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = if (isEditMode) "Update Schedule" else "Save Schedule")
+                Text(if (isEditMode) "Update Schedule" else "Save Schedule")
             }
 
             if (isEditMode) {
                 OutlinedButton(
                     onClick = { showDeleteDialog = true },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error
-                    )
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Delete Schedule")
                 }
@@ -174,7 +120,7 @@ fun ScheduleContent(
                         onDeleteClick()
                     }
                 ) {
-                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                    Text("Delete")
                 }
             },
             dismissButton = {
@@ -182,12 +128,8 @@ fun ScheduleContent(
                     Text("Cancel")
                 }
             },
-            title = {
-                Text("Delete Schedule", fontWeight = FontWeight.SemiBold)
-            },
-            text = {
-                Text("Are you sure you want to delete this schedule?")
-            }
+            title = { Text("Delete Schedule") },
+            text = { Text("Are you sure?") }
         )
     }
 }

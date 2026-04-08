@@ -1,4 +1,4 @@
-package uk.ac.tees.mad.mystudyplanner.presentation.home
+package uk.ac.tees.mad.mystudyplanner.presentation.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -11,6 +11,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -20,23 +21,33 @@ import uk.ac.tees.mad.mystudyplanner.ui.theme.MyStudyPlannerTheme
 fun StudySessionCard(
     session: StudySessionUiState
 ) {
-    val cardColor = if (session.isNext)
-        MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-    else
-        MaterialTheme.colorScheme.surface
+
+    val cardColor = when {
+        session.isCompleted ->
+            MaterialTheme.colorScheme.surfaceVariant   // grey
+        session.isNext ->
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+        else ->
+            MaterialTheme.colorScheme.surface
+    }
+
+    val contentAlpha = if (session.isCompleted) 0.5f else 1f
 
     Card(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = cardColor),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+        ) {
 
             Text(
                 text = session.subject,
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.alpha(contentAlpha)
             )
 
             Spacer(modifier = Modifier.height(6.dp))
@@ -44,7 +55,7 @@ fun StudySessionCard(
             Text(
                 text = "${session.startTime} - ${session.endTime}",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                modifier = Modifier.alpha(contentAlpha)
             )
 
             if (session.isNext) {
@@ -54,6 +65,15 @@ fun StudySessionCard(
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.SemiBold
+                )
+            }
+
+            if (session.isCompleted) {
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = "Completed",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.outline
                 )
             }
         }

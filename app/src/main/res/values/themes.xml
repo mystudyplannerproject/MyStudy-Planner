@@ -2,7 +2,6 @@
 <resources>
 
     <style name="Theme.MyStudyPlanner" parent="android:Theme.Material.Light.NoActionBar" >
-        <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowDisablePreview">true</item>
     </style>
 </resources>

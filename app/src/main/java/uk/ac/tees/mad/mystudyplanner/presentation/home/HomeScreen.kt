@@ -1,11 +1,11 @@
 package uk.ac.tees.mad.mystudyplanner.presentation.home
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
+import uk.ac.tees.mad.mystudyplanner.presentation.components.StudySessionUiState
 import uk.ac.tees.mad.mystudyplanner.ui.theme.MyStudyPlannerTheme
 
 @Composable
@@ -22,6 +22,9 @@ fun HomeScreen(
         onAddScheduleClick = onAddScheduleClick,
         onSessionClick = {
             onEditScheduleClick(it.id)
+        },
+        onDeleteSession = {
+            viewModel.deleteSession(it)
         }
     )
 }
@@ -49,7 +52,8 @@ fun HomeContentPreview() {
                 )
             ),
             onAddScheduleClick = {},
-            onSessionClick = {}
+            onSessionClick = {},
+            onDeleteSession = {}
         )
     }
 }

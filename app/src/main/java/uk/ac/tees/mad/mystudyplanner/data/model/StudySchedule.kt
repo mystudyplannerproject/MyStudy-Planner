@@ -7,6 +7,6 @@ data class StudySchedule(
     val subject: String = "",
     val startTime: String = "",
     val endTime: String = "",
-    val day: String = "",
+    val selectedDate: String = "",
     val createdAt: Timestamp = Timestamp.now()
 )

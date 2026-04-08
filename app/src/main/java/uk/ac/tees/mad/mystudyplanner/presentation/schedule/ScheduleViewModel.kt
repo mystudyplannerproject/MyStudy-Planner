@@ -2,15 +2,15 @@ package uk.ac.tees.mad.mystudyplanner.presentation.schedule
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import uk.ac.tees.mad.mystudyplanner.data.model.StudySchedule
 import uk.ac.tees.mad.mystudyplanner.data.repository.ScheduleRepository
 import uk.ac.tees.mad.mystudyplanner.notification.CalendarHelper
 import uk.ac.tees.mad.mystudyplanner.notification.ReminderScheduler
+import java.text.SimpleDateFormat
+import java.util.*
 
 class ScheduleViewModel : ViewModel() {
 
@@ -25,16 +25,29 @@ class ScheduleViewModel : ViewModel() {
         _uiState.value = _uiState.value.copy(subject = value, error = null)
     }
 
-    fun updateDay(value: String) {
-        _uiState.value = _uiState.value.copy(day = value, error = null)
-    }
-
     fun updateStartTime(value: String) {
         _uiState.value = _uiState.value.copy(startTime = value, error = null)
     }
 
     fun updateEndTime(value: String) {
         _uiState.value = _uiState.value.copy(endTime = value, error = null)
+    }
+
+    fun loadSchedule(scheduleId: String) {
+
+        repository.getScheduleById(scheduleId) { schedule ->
+
+            if (schedule != null) {
+                _uiState.value = ScheduleUiState(
+                    subject = schedule.subject,
+                    startTime = schedule.startTime,
+                    endTime = schedule.endTime
+                )
+            } else {
+                _uiState.value =
+                    _uiState.value.copy(error = "Failed to load schedule")
+            }
+        }
     }
 
     fun addSchedule(
@@ -48,7 +61,6 @@ class ScheduleViewModel : ViewModel() {
 
         if (
             state.subject.isBlank() ||
-            state.day.isBlank() ||
             state.startTime.isBlank() ||
             state.endTime.isBlank()
         ) {
@@ -58,11 +70,16 @@ class ScheduleViewModel : ViewModel() {
 
         isSubmitting = true
 
+        val today = SimpleDateFormat(
+            "dd MMM yyyy",
+            Locale.getDefault()
+        ).format(Date())
+
         val schedule = StudySchedule(
             subject = state.subject,
             startTime = state.startTime,
             endTime = state.endTime,
-            day = state.day
+            selectedDate = today
         )
 
         repository.addSchedule(schedule) { success ->
@@ -70,7 +87,8 @@ class ScheduleViewModel : ViewModel() {
 
             if (success) {
 
-                val triggerTimeMillis = System.currentTimeMillis() + 60000
+                val triggerTimeMillis =
+                    computeTriggerTime(today, state.startTime)
 
                 ReminderScheduler.scheduleReminder(
                     context,
@@ -111,7 +129,6 @@ class ScheduleViewModel : ViewModel() {
 
         if (
             state.subject.isBlank() ||
-            state.day.isBlank() ||
             state.startTime.isBlank() ||
             state.endTime.isBlank()
         ) {
@@ -119,12 +136,17 @@ class ScheduleViewModel : ViewModel() {
             return
         }
 
+        val today = SimpleDateFormat(
+            "dd MMM yyyy",
+            Locale.getDefault()
+        ).format(Date())
+
         val schedule = StudySchedule(
             id = scheduleId,
             subject = state.subject,
             startTime = state.startTime,
             endTime = state.endTime,
-            day = state.day
+            selectedDate = today
         )
 
         repository.updateSchedule(schedule) { success ->
@@ -133,7 +155,8 @@ class ScheduleViewModel : ViewModel() {
 
                 ReminderScheduler.cancelReminder(context, scheduleId)
 
-                val triggerTimeMillis = System.currentTimeMillis() + 60000
+                val triggerTimeMillis =
+                    computeTriggerTime(today, state.startTime)
 
                 ReminderScheduler.scheduleReminder(
                     context,
@@ -174,16 +197,28 @@ class ScheduleViewModel : ViewModel() {
         repository.deleteSchedule(scheduleId) { success ->
 
             if (success) {
-
                 ReminderScheduler.cancelReminder(context, scheduleId)
                 onSuccess()
-
             } else {
                 _uiState.value =
-                    _uiState.value.copy(
-                        error = "Failed to delete schedule"
-                    )
+                    _uiState.value.copy(error = "Failed to delete schedule")
             }
         }
+    }
+
+    private fun computeTriggerTime(
+        selectedDate: String,
+        startTime: String
+    ): Long {
+
+        val dateFormat =
+            SimpleDateFormat("dd MMM yyyy hh:mm a", Locale.getDefault())
+
+        val combined = "$selectedDate $startTime"
+
+        val parsedDate = dateFormat.parse(combined)
+            ?: return System.currentTimeMillis()
+
+        return parsedDate.time
     }
 }

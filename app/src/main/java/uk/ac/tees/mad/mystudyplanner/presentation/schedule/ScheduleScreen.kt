@@ -18,7 +18,14 @@ fun ScheduleScreen(
 
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
+
     val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(scheduleId) {
+        if (isEditMode && scheduleId != null) {
+            viewModel.loadSchedule(scheduleId)
+        }
+    }
 
     fun showTimePicker(onTimeSelected: (String) -> Unit) {
         val hour = calendar.get(Calendar.HOUR_OF_DAY)
@@ -41,7 +48,6 @@ fun ScheduleScreen(
         uiState = uiState,
         isEditMode = isEditMode,
         onSubjectChange = viewModel::updateSubject,
-        onDayChange = viewModel::updateDay,
         onStartTimeClick = {
             showTimePicker { time ->
                 viewModel.updateStartTime(time)
@@ -96,7 +102,6 @@ fun AddSchedulePreview() {
             uiState = ScheduleUiState(),
             isEditMode = false,
             onSubjectChange = {},
-            onDayChange = {},
             onStartTimeClick = {},
             onEndTimeClick = {},
             onSaveClick = {},
@@ -114,11 +119,9 @@ fun EditSchedulePreview() {
                 subject = "Physics",
                 startTime = "11:00 AM",
                 endTime = "12:00 PM",
-                day = "Tuesday"
             ),
             isEditMode = true,
             onSubjectChange = {},
-            onDayChange = {},
             onStartTimeClick = {},
             onEndTimeClick = {},
             onSaveClick = {},
