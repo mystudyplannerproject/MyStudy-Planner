@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import uk.ac.tees.mad.mystudyplanner.data.local.PreferencesManager
 import uk.ac.tees.mad.mystudyplanner.data.model.StudySchedule
 import uk.ac.tees.mad.mystudyplanner.data.repository.ScheduleRepository
 import uk.ac.tees.mad.mystudyplanner.notification.CalendarHelper
@@ -34,9 +35,7 @@ class ScheduleViewModel : ViewModel() {
     }
 
     fun loadSchedule(scheduleId: String) {
-
         repository.getScheduleById(scheduleId) { schedule ->
-
             if (schedule != null) {
                 _uiState.value = ScheduleUiState(
                     subject = schedule.subject,
@@ -56,7 +55,6 @@ class ScheduleViewModel : ViewModel() {
     ) {
 
         val state = _uiState.value
-
         if (isSubmitting) return
 
         if (
@@ -87,22 +85,17 @@ class ScheduleViewModel : ViewModel() {
 
             if (success) {
 
-                val triggerTimeMillis =
-                    computeTriggerTime(today, state.startTime)
+                scheduleAlarms(context, schedule.id, schedule.subject, today, state.startTime)
 
-                ReminderScheduler.scheduleReminder(
-                    context,
-                    schedule.id,
-                    schedule.subject,
-                    triggerTimeMillis
-                )
+                val startTimeMillis =
+                    computeTriggerTime(today, state.startTime)
 
                 CalendarHelper.addEventToCalendar(
                     context = context,
                     scheduleId = schedule.id,
                     title = schedule.subject,
-                    startTimeMillis = triggerTimeMillis,
-                    endTimeMillis = triggerTimeMillis + 3600000
+                    startTimeMillis = startTimeMillis,
+                    endTimeMillis = startTimeMillis + 3600000
                 )
 
                 onSuccess()
@@ -153,25 +146,10 @@ class ScheduleViewModel : ViewModel() {
 
             if (success) {
 
-                ReminderScheduler.cancelReminder(context, scheduleId)
+                ReminderScheduler.cancelReminder(context, "${scheduleId}_REMINDER")
+                ReminderScheduler.cancelReminder(context, "${scheduleId}_START")
 
-                val triggerTimeMillis =
-                    computeTriggerTime(today, state.startTime)
-
-                ReminderScheduler.scheduleReminder(
-                    context,
-                    scheduleId,
-                    schedule.subject,
-                    triggerTimeMillis
-                )
-
-                CalendarHelper.addEventToCalendar(
-                    context = context,
-                    scheduleId = scheduleId,
-                    title = schedule.subject,
-                    startTimeMillis = triggerTimeMillis,
-                    endTimeMillis = triggerTimeMillis + 3600000
-                )
+                scheduleAlarms(context, scheduleId, schedule.subject, today, state.startTime)
 
                 onSuccess()
 
@@ -197,12 +175,51 @@ class ScheduleViewModel : ViewModel() {
         repository.deleteSchedule(scheduleId) { success ->
 
             if (success) {
-                ReminderScheduler.cancelReminder(context, scheduleId)
+
+                ReminderScheduler.cancelReminder(context, "${scheduleId}_REMINDER")
+                ReminderScheduler.cancelReminder(context, "${scheduleId}_START")
+
                 onSuccess()
+
             } else {
                 _uiState.value =
                     _uiState.value.copy(error = "Failed to delete schedule")
             }
+        }
+    }
+
+    private fun scheduleAlarms(
+        context: Context,
+        scheduleId: String,
+        subject: String,
+        date: String,
+        startTime: String
+    ) {
+
+        val startTimeMillis = computeTriggerTime(date, startTime)
+
+        val prefs = PreferencesManager(context)
+        val offsetMinutes = prefs.getReminderOffset()
+
+        val reminderTimeMillis =
+            startTimeMillis - (offsetMinutes * 60 * 1000)
+
+        if (reminderTimeMillis > System.currentTimeMillis()) {
+            ReminderScheduler.scheduleReminder(
+                context,
+                "${scheduleId}_REMINDER",
+                "Upcoming: $subject",
+                reminderTimeMillis
+            )
+        }
+
+        if (startTimeMillis > System.currentTimeMillis()) {
+            ReminderScheduler.scheduleReminder(
+                context,
+                "${scheduleId}_START",
+                "Session Started: $subject",
+                startTimeMillis
+            )
         }
     }
 
