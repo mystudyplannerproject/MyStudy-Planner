@@ -1,11 +1,14 @@
 package uk.ac.tees.mad.mystudyplanner.presentation.home
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -22,44 +25,57 @@ fun HomeContent(
     onSessionClick: (StudySessionUiState) -> Unit,
     onDeleteSession: (String) -> Unit
 ) {
+
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onAddScheduleClick,
-                containerColor = MaterialTheme.colorScheme.primary
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                elevation = FloatingActionButtonDefaults.elevation(
+                    defaultElevation = 8.dp
+                )
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Add Schedule",
-                    tint = MaterialTheme.colorScheme.onPrimary
+                    contentDescription = "Add Schedule"
                 )
             }
         }
-    ) { padding ->
+    ) { paddingValues ->
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
+                .padding(paddingValues)
+                .padding(horizontal = 20.dp)
         ) {
 
             Text(
                 text = "Your Study Plan",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.SemiBold
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Stay consistent. Stay focused.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.height(28.dp))
 
             if (uiState.sessions.isEmpty()) {
                 EmptyStudyPlan()
             } else {
                 LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    verticalArrangement = Arrangement.spacedBy(18.dp),
+                    contentPadding = PaddingValues(bottom = 120.dp)
                 ) {
                     items(
                         items = uiState.sessions,
-                        key = { it.id }   // important for animation stability
+                        key = { it.id }
                     ) { session ->
 
                         SwipeToDeleteItem(
@@ -85,16 +101,29 @@ fun HomeContent(
     }
 }
 
+
 @Composable
 fun EmptyStudyPlan() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
+
         Text(
-            text = "No study sessions planned for today",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+            text = "No sessions planned today",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold
+        )
+
+        Spacer(modifier = Modifier.height(6.dp))
+
+        Text(
+            text = "Tap + to add your first study session",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -119,16 +148,23 @@ fun SwipeToDeleteItem(
     SwipeToDismissBox(
         state = dismissState,
         backgroundContent = {
+
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp),
+                    .padding(vertical = 6.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.errorContainer,
+                        shape = RoundedCornerShape(24.dp)
+                    )
+                    .padding(horizontal = 24.dp),
                 contentAlignment = Alignment.CenterEnd
             ) {
-                Text(
-                    text = "Delete",
-                    color = MaterialTheme.colorScheme.error,
-                    fontWeight = FontWeight.Bold
+
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete",
+                    tint = MaterialTheme.colorScheme.onErrorContainer
                 )
             }
         }
@@ -136,4 +172,3 @@ fun SwipeToDeleteItem(
         content()
     }
 }
-

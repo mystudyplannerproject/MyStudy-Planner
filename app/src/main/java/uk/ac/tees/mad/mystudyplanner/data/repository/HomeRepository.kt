@@ -73,29 +73,45 @@ class HomeRepository {
             Locale.getDefault()
         )
 
-        val sorted = sessions.sortedBy {
-            formatter.parse("${it.selectedDate} ${it.startTime}")?.time
-                ?: Long.MAX_VALUE
+        val mapped = sessions.map { session ->
+
+            val startMillis = formatter.parse(
+                "${session.selectedDate} ${session.startTime}"
+            )?.time ?: Long.MAX_VALUE
+
+            val endMillis = formatter.parse(
+                "${session.selectedDate} ${session.endTime}"
+            )?.time ?: 0L
+
+            val isCompleted = endMillis < now
+
+            Triple(session, startMillis, isCompleted)
         }
 
-        val nextId = sorted.firstOrNull { session ->
-            val endTime = formatter.parse(
-                "${session.selectedDate} ${session.endTime}"
-            )?.time ?: 0
-            endTime > now
-        }?.id
+        val active = mapped.filter { !it.third }
+        val completed = mapped.filter { it.third }
 
-        return sorted.map { session ->
+        val sortedActive = active.sortedBy { it.second }
 
-            val endTimeMillis = formatter.parse(
-                "${session.selectedDate} ${session.endTime}"
-            )?.time ?: 0
+        val nextId = sortedActive.firstOrNull()?.first?.id
 
-            session.copy(
-                isNext = session.id == nextId,
-                isCompleted = endTimeMillis < now
+        val finalActive = sortedActive.map {
+            it.first.copy(
+                isNext = it.first.id == nextId,
+                isCompleted = false
             )
         }
+
+        val finalCompleted = completed
+            .sortedBy { it.second }
+            .map {
+                it.first.copy(
+                    isNext = false,
+                    isCompleted = true
+                )
+            }
+
+        return finalActive + finalCompleted
     }
 
     fun clearListener() {

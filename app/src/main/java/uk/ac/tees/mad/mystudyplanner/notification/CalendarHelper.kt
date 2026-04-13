@@ -28,11 +28,14 @@ object CalendarHelper {
             put(CalendarContract.Events.DTSTART, startTimeMillis)
             put(CalendarContract.Events.DTEND, endTimeMillis)
             put(CalendarContract.Events.TITLE, title)
-            put(CalendarContract.Events.DESCRIPTION, "Study Session")
+
+            put(
+                CalendarContract.Events.DESCRIPTION,
+                "Study Session | MSP_ID:$scheduleId"
+            )
+
             put(CalendarContract.Events.CALENDAR_ID, calendarId)
             put(CalendarContract.Events.EVENT_TIMEZONE, TimeZone.getDefault().id)
-            put(CalendarContract.Events.HAS_ALARM, 1)
-            put(CalendarContract.Events.UID_2445, scheduleId)
         }
 
         context.contentResolver.insert(
@@ -44,8 +47,7 @@ object CalendarHelper {
     private fun getPrimaryCalendarId(context: Context): Long? {
 
         val projection = arrayOf(
-            CalendarContract.Calendars._ID,
-            CalendarContract.Calendars.IS_PRIMARY
+            CalendarContract.Calendars._ID
         )
 
         val cursor = context.contentResolver.query(
@@ -57,15 +59,6 @@ object CalendarHelper {
         )
 
         cursor?.use {
-            while (it.moveToNext()) {
-                val id = it.getLong(0)
-                val isPrimary = it.getInt(1)
-                if (isPrimary == 1) {
-                    return id
-                }
-            }
-
-            // fallback → first calendar
             if (it.moveToFirst()) {
                 return it.getLong(0)
             }
@@ -74,33 +67,37 @@ object CalendarHelper {
         return null
     }
 
+    private fun isEventAlreadyAdded(context: Context, scheduleId: String): Boolean {
+
+        val projection = arrayOf(
+            CalendarContract.Events._ID,
+            CalendarContract.Events.DESCRIPTION
+        )
+
+        val cursor = context.contentResolver.query(
+            CalendarContract.Events.CONTENT_URI,
+            projection,
+            null,
+            null,
+            null
+        )
+
+        cursor?.use {
+            while (it.moveToNext()) {
+                val description = it.getString(1) ?: continue
+                if (description.contains("MSP_ID:$scheduleId")) {
+                    return true
+                }
+            }
+        }
+
+        return false
+    }
+
     fun hasCalendarPermission(context: Context): Boolean {
         return ContextCompat.checkSelfPermission(
             context,
             Manifest.permission.WRITE_CALENDAR
         ) == PackageManager.PERMISSION_GRANTED
-    }
-
-    private fun isEventAlreadyAdded(context: Context, scheduleId: String): Boolean {
-
-        val projection = arrayOf(
-            CalendarContract.Events._ID
-        )
-
-        val selection = "${CalendarContract.Events.UID_2445} = ?"
-        val selectionArgs = arrayOf(scheduleId)
-
-        val cursor = context.contentResolver.query(
-            CalendarContract.Events.CONTENT_URI,
-            projection,
-            selection,
-            selectionArgs,
-            null
-        )
-
-        val exists = (cursor?.count ?: 0) > 0
-        cursor?.close()
-
-        return exists
     }
 }

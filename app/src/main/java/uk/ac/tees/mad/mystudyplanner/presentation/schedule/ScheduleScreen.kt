@@ -17,7 +17,7 @@ fun ScheduleScreen(
 ) {
 
     val context = LocalContext.current
-    val calendar = Calendar.getInstance()
+    val calendar = remember { Calendar.getInstance() }
 
     val uiState by viewModel.uiState.collectAsState()
 
@@ -34,9 +34,7 @@ fun ScheduleScreen(
         TimePickerDialog(
             context,
             { _, selectedHour, selectedMinute ->
-                val formattedTime =
-                    formatTo12Hour(selectedHour, selectedMinute)
-                onTimeSelected(formattedTime)
+                onTimeSelected(formatTo12Hour(selectedHour, selectedMinute))
             },
             hour,
             minute,
@@ -84,13 +82,11 @@ fun ScheduleScreen(
 
 private fun formatTo12Hour(hour: Int, minute: Int): String {
     val amPm = if (hour >= 12) "PM" else "AM"
-
     val formattedHour = when {
         hour == 0 -> 12
         hour > 12 -> hour - 12
         else -> hour
     }
-
     return String.format("%02d:%02d %s", formattedHour, minute, amPm)
 }
 

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -51,6 +52,7 @@ fun AuthContent(
     val gradient = Brush.verticalGradient(
         colors = listOf(
             MaterialTheme.colorScheme.primary,
+            MaterialTheme.colorScheme.tertiary,
             MaterialTheme.colorScheme.secondary
         )
     )
@@ -65,29 +67,41 @@ fun AuthContent(
                 .fillMaxSize()
                 .background(gradient)
                 .padding(padding)
-                .padding(16.dp),
+                .padding(20.dp),
             contentAlignment = Alignment.Center
         ) {
 
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(28.dp),
-                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
-                shadowElevation = 8.dp
+                shape = RoundedCornerShape(32.dp),
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.85f),
+                shadowElevation = 16.dp,
+                tonalElevation = 8.dp
             ) {
+
                 Column(
-                    modifier = Modifier.padding(24.dp),
-                    verticalArrangement = Arrangement.spacedBy(18.dp)
+                    modifier = Modifier.padding(28.dp),
+                    verticalArrangement = Arrangement.spacedBy(22.dp)
                 ) {
 
                     Text(
                         text = if (state.mode == AuthMode.LOGIN)
-                            "Welcome back"
+                            "Welcome Back 👋"
                         else
-                            "Create account",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.SemiBold,
+                            "Create Account ✨",
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
                         color = MaterialTheme.colorScheme.primary
+                    )
+
+                    Text(
+                        text = if (state.mode == AuthMode.LOGIN)
+                            "Login to continue your study journey"
+                        else
+                            "Start organizing your academic life",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
 
                     OutlinedTextField(
@@ -97,13 +111,15 @@ fun AuthContent(
                         isError = !state.isEmailValid,
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
+                        shape = RoundedCornerShape(18.dp),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
                             focusedLabelColor = MaterialTheme.colorScheme.primary,
-                            cursorColor = MaterialTheme.colorScheme.primary
-                        ),
-                        shape = RoundedCornerShape(14.dp)
+                            cursorColor = MaterialTheme.colorScheme.primary,
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface
+                        )
                     )
 
                     OutlinedTextField(
@@ -114,13 +130,15 @@ fun AuthContent(
                         isError = !state.isPasswordValid,
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
+                        shape = RoundedCornerShape(18.dp),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
                             focusedLabelColor = MaterialTheme.colorScheme.primary,
-                            cursorColor = MaterialTheme.colorScheme.primary
-                        ),
-                        shape = RoundedCornerShape(14.dp)
+                            cursorColor = MaterialTheme.colorScheme.primary,
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface
+                        )
                     )
 
                     Button(
@@ -128,12 +146,21 @@ fun AuthContent(
                         enabled = state.canSubmit,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(54.dp),
-                        shape = RoundedCornerShape(18.dp)
+                            .height(56.dp),
+                        shape = RoundedCornerShape(20.dp),
+                        elevation = ButtonDefaults.buttonElevation(
+                            defaultElevation = 8.dp,
+                            pressedElevation = 2.dp
+                        )
                     ) {
                         Text(
-                            text = if (state.mode == AuthMode.LOGIN) "Login" else "Register",
-                            style = MaterialTheme.typography.titleMedium
+                            text = if (state.mode == AuthMode.LOGIN)
+                                "Login"
+                            else
+                                "Register",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.SemiBold
+                            )
                         )
                     }
 
@@ -146,7 +173,10 @@ fun AuthContent(
                                 "New here? Create an account"
                             else
                                 "Already have an account? Login",
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.Medium
+                            )
                         )
                     }
                 }

@@ -60,4 +60,6 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.firebase.firestore)
+    implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.material)
 }

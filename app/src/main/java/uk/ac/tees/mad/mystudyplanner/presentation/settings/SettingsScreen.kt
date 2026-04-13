@@ -1,6 +1,7 @@
 package uk.ac.tees.mad.mystudyplanner.presentation.settings
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -28,60 +29,113 @@ fun SettingsScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+                .padding(horizontal = 20.dp)
         ) {
+
+            Spacer(modifier = Modifier.height(24.dp))
 
             Text(
                 text = "Settings",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.SemiBold
             )
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+            Text(
+                text = "Customize your study experience",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.height(28.dp))
+
+            Surface(
+                shape = RoundedCornerShape(24.dp),
+                tonalElevation = 2.dp,
+                shadowElevation = 4.dp,
+                color = MaterialTheme.colorScheme.surface
             ) {
-                Text("Enable Reminders")
-                Switch(
-                    checked = uiState.remindersEnabled,
-                    onCheckedChange = {
-                        uiState = uiState.copy(remindersEnabled = it)
-                        viewModel.updateReminders(context, it)
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+
+                    // REMINDERS SWITCH
+                    Column {
+                        Text(
+                            text = "Reminders",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = "Enable Reminders",
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+
+                            Switch(
+                                checked = uiState.remindersEnabled,
+                                onCheckedChange = {
+                                    uiState = uiState.copy(remindersEnabled = it)
+                                    viewModel.updateReminders(context, it)
+                                }
+                            )
+                        }
                     }
-                )
+
+                    Column {
+
+                        Text(
+                            text = "Reminder Time",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = "${uiState.reminderOffset} minutes before session",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Slider(
+                            value = uiState.reminderOffset.toFloat(),
+                            onValueChange = {
+                                uiState = uiState.copy(reminderOffset = it.toInt())
+                                viewModel.updateOffset(context, it.toInt())
+                            },
+                            valueRange = 0f..60f,
+                            steps = 11
+                        )
+                    }
+                }
             }
 
-            Column {
-                Text("Reminder Offset (minutes before)")
-                Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.weight(1f))
 
-                Slider(
-                    value = uiState.reminderOffset.toFloat(),
-                    onValueChange = {
-                        uiState = uiState.copy(reminderOffset = it.toInt())
-                        viewModel.updateOffset(context, it.toInt())
-                    },
-                    valueRange = 0f..60f,
-                    steps = 11
-                )
-
-                Text("${uiState.reminderOffset} minutes")
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
+            OutlinedButton(
                 onClick = {
                     viewModel.logout(context) {
                         onLogout()
                     }
                 },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 32.dp),
+                shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.error
                 )
             ) {
                 Text("Logout")
